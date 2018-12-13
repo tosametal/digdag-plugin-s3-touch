@@ -7,7 +7,7 @@ plugins {
 
 
 group =  'io.digdag.plugin'
-version = '1.0-SNAPSHOT'
+version = '0.0.1'
 
 def digdagVersion = "0.9.31"
 def scalaSemanticVersion = "2.12.7"

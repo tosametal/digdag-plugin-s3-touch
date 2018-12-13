@@ -2,4 +2,10 @@ plugin:
   repositories:
     - file://${repos}
   dependencies:
-    - io.digdag.plugin:digdag-plugin-s3-touch:1.0-SNAPSHOT
+    - io.digdag.plugin:digdag-plugin-s3-touch:0.0.1
+
+s3_touch:
+  bucket_name: ${secret:bucket_name}
+  access_key: ${secret:access_key}
+  secret_key: ${secret:secret_key}
+  default_region: ${secret:default_region}

@@ -1,0 +1,2 @@
+time:
+  hour_1hour_ago: ${moment(session_time).add(-1, 'days').format("YYYYMMDDHH")}
