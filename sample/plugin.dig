@@ -1,8 +1,4 @@
 _export:
-  plugin:
-    repositories:
-      - file://${repos}
-    dependencies:
-      - io.digdag.plugin:digdag-plugin-s3-touch:1.0-SNAPSHOT
+  !include : 'config/setting.dig'
 +step1:
   s3_touch>:

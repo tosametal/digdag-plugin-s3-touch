@@ -1,3 +1,24 @@
+# Usage
+for production
+
+```yaml
+_export:
+  plugin:
+    repositories:
+      - https://jitpack.io
+    dependencies:
+      - com.github.tosametal:digdag-plugin-s3-touch:0.0.1
+  s3_touch:
+    bucket_name: xxxx
+    access_key: xxxx
+    secret_key: xxxx
+    default_region: xxxx
++step1:
+  s3_touch>:
+  filename: xxxxx
+```
+
+
 # Build
 ```bash
 ./gradlew publish
