@@ -1,8 +1,10 @@
 plugin:
   repositories:
     - file://${repos}
+    # - https://jitpack.io/
   dependencies:
     - io.digdag.plugin:digdag-plugin-s3-touch:0.0.1
+    # - com.github.tosametal:digdag-plugin-s3-touch:0.0.1
 
 s3_touch:
   bucket_name: ${secret:bucket_name}
