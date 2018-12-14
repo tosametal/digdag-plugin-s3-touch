@@ -15,6 +15,7 @@ class S3TouchOperatorFactory extends OperatorFactory {
 }
 
 object S3TouchOperatorFactory {
+
   private class S3TouchOperator(context: OperatorContext) extends BaseOperator(context) {
     override def runTask(): TaskResult = {
       println("s3_touch start")
@@ -28,6 +29,8 @@ object S3TouchOperatorFactory {
       val secretKey = formatSecret(s3TouchConfig.get("secret_key", classOf[String]))
       val defaultRegion = formatSecret(s3TouchConfig.get("default_region", classOf[String]))
       val flagFile = params.get("_command", classOf[String])
+      val maybeProxyHost = params.getOptional("proxy_host", classOf[String]).toOption
+      val maybeProxyPort = params.getOptional("proxy_port", classOf[Int]).toOption
 
       println(
         s"""
@@ -36,6 +39,8 @@ object S3TouchOperatorFactory {
           |secretKey = $secretKey
           |defaultRegion = $defaultRegion
           |flagFile = $flagFile
+          |maybeProxyHost = $maybeProxyHost
+          |maybeProxyPort = $maybeProxyPort
         """.stripMargin)
 
       TaskResult.empty(request)
