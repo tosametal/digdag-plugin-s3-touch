@@ -2,4 +2,4 @@ _export:
   !include : 'config/setting.dig'
   !include : 'config/time.dig'
 +step1:
-  s3_touch>: /path/to/flag
+  s3_touch>: path/to/flags/${time.hour_1hour_ago}

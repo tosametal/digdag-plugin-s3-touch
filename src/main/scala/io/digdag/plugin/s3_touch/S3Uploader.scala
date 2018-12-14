@@ -18,6 +18,7 @@ class S3Uploader(
   region: String,
   accessControlList: String
 ) {
+
   private def buildS3Client(): AmazonS3 = {
     val credentials = new BasicAWSCredentials(accessKey, secretKey)
     val clientConf = new ClientConfiguration()
@@ -48,23 +49,27 @@ class S3Uploader(
     case _ => None
   }
 
-  private def upload(client: AmazonS3, putObjectRequest: PutObjectRequest): Either[Throwable, Unit] = {
-    try {
-      client.putObject(putObjectRequest)
-      Right()
-    } catch {
-      case scala.util.control.NonFatal(e) => Left(e)
-    }
+  private def getFileName(flagFile: String): String = {
+    val array = flagFile.split("/")
+    if (array.length == 1) array.head
+    else array.last
   }
 
   def upload(flagFile: String): Either[Throwable, Unit] = {
-    val client = buildS3Client()
-    val file = new File(flagFile)
+    import scala.sys.process.Process
+
+    val fileName = getFileName(flagFile)
+    val tmpFileName = "/tmp/" + fileName
+
+    Process(s"touch $tmpFileName") run()
+
+    val file = new File(tmpFileName)
     val fileInputStream = new FileInputStream(file)
     val objectMetadata = new ObjectMetadata()
     objectMetadata.setContentLength(file.length)
-    val putRequest = new PutObjectRequest(bucketName, file.getName, fileInputStream, objectMetadata)
+    val putRequest = new PutObjectRequest(bucketName, flagFile, fileInputStream, objectMetadata)
 
+    val client = buildS3Client()
     try {
       mapAcl(accessControlList) match {
         case Some(acl) => putRequest.setCannedAcl(acl)
@@ -72,6 +77,7 @@ class S3Uploader(
       }
       // アップロード
       client.putObject(putRequest)
+      Process(s"rm $tmpFileName") run()
       Right()
     } catch {
       case scala.util.control.NonFatal(e) => Left(e)

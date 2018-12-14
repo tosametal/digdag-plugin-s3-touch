@@ -17,11 +17,10 @@ class S3TouchOperatorFactory extends OperatorFactory {
 object S3TouchOperatorFactory {
 
   private class S3TouchOperator(context: OperatorContext) extends BaseOperator(context) {
+    private def formatSecret(str: String): String = UserSecretTemplate.of(str).format(context.getSecrets)
+
     override def runTask(): TaskResult = {
-      println("s3_touch start")
-
       val params = request.getConfig.mergeDefault(request.getConfig.getNestedOrGetEmpty("s3_touch"))
-
       val s3TouchConfig = params.get("s3_touch", classOf[Config])
 
       val bucketName = formatSecret(s3TouchConfig.get("bucket_name", classOf[String]))
@@ -34,20 +33,9 @@ object S3TouchOperatorFactory {
       val maybeProxyPort = params.getOptional("proxy_port", classOf[Int]).toOption
       val accessControlList = formatSecret(params.get("access_control_list", classOf[String]))
 
-      println(
-        s"""
-          |bucketName = $bucketName
-          |accessKey = $accessKey
-          |secretKey = $secretKey
-          |serviceEndpoint = $serviceEndpoint
-          |defaultRegion = $defaultRegion
-          |flagFile = $flagFile
-          |maybeProxyHost = $maybeProxyHost
-          |maybeProxyPort = $maybeProxyPort
-        """.stripMargin)
-
       val uploader =
         new S3Uploader(bucketName, accessKey, secretKey, maybeProxyHost, maybeProxyPort, serviceEndpoint, defaultRegion, accessControlList)
+
       uploader.upload(flagFile) match {
         case Right(_) => println("success to upload")
         case Left(e) => e.printStackTrace()
@@ -55,11 +43,5 @@ object S3TouchOperatorFactory {
 
       TaskResult.empty(request)
     }
-
-
-    private def formatSecret(str: String): String = {
-      UserSecretTemplate.of(str).format(context.getSecrets)
-    }
-
   }
 }
