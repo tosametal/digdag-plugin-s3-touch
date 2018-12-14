@@ -79,7 +79,7 @@ class S3Uploader(
       // アップロード
       client.putObject(putRequest)
       Process(s"rm $tmpFileName") run ()
-      Right()
+      Right(())
     } catch {
       case scala.util.control.NonFatal(e) => Left(e)
     } finally {
