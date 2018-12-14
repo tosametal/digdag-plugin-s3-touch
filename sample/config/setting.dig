@@ -10,4 +10,6 @@ s3_touch:
   bucket_name: ${secret:bucket_name}
   access_key: ${secret:access_key}
   secret_key: ${secret:secret_key}
+  service_endpoint: ${secret:service_endpoint}
   default_region: ${secret:default_region}
+  access_control_list: bucket-owner-full-control

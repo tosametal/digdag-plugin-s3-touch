@@ -27,21 +27,31 @@ object S3TouchOperatorFactory {
       val bucketName = formatSecret(s3TouchConfig.get("bucket_name", classOf[String]))
       val accessKey = formatSecret(s3TouchConfig.get("access_key", classOf[String]))
       val secretKey = formatSecret(s3TouchConfig.get("secret_key", classOf[String]))
+      val serviceEndpoint = formatSecret(s3TouchConfig.get("service_endpoint", classOf[String]))
       val defaultRegion = formatSecret(s3TouchConfig.get("default_region", classOf[String]))
       val flagFile = params.get("_command", classOf[String])
       val maybeProxyHost = params.getOptional("proxy_host", classOf[String]).toOption
       val maybeProxyPort = params.getOptional("proxy_port", classOf[Int]).toOption
+      val accessControlList = formatSecret(params.get("access_control_list", classOf[String]))
 
       println(
         s"""
           |bucketName = $bucketName
           |accessKey = $accessKey
           |secretKey = $secretKey
+          |serviceEndpoint = $serviceEndpoint
           |defaultRegion = $defaultRegion
           |flagFile = $flagFile
           |maybeProxyHost = $maybeProxyHost
           |maybeProxyPort = $maybeProxyPort
         """.stripMargin)
+
+      val uploader =
+        new S3Uploader(bucketName, accessKey, secretKey, maybeProxyHost, maybeProxyPort, serviceEndpoint, defaultRegion, accessControlList)
+      uploader.upload(flagFile) match {
+        case Right(_) => println("success to upload")
+        case Left(e) => e.printStackTrace()
+      }
 
       TaskResult.empty(request)
     }
@@ -50,5 +60,6 @@ object S3TouchOperatorFactory {
     private def formatSecret(str: String): String = {
       UserSecretTemplate.of(str).format(context.getSecrets)
     }
+
   }
 }
