@@ -4,3 +4,4 @@ target
 build
 .gradle
 digdag-plugin-s3-touch.iml
+sample/secrets.prod.json
