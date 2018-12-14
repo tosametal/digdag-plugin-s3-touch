@@ -30,7 +30,8 @@ class S3Uploader(
       clientConf.setProxyPort(proxyPort)
     }
     val endpointConf = new EndpointConfiguration(serviceEndpoint, region)
-    AmazonS3ClientBuilder.standard()
+    AmazonS3ClientBuilder
+      .standard()
       .withCredentials(new AWSStaticCredentialsProvider(credentials))
       .withClientConfiguration(clientConf)
       .withEndpointConfiguration(endpointConf)
@@ -61,7 +62,7 @@ class S3Uploader(
     val fileName = getFileName(flagFile)
     val tmpFileName = "/tmp/" + fileName
 
-    Process(s"touch $tmpFileName") run()
+    Process(s"touch $tmpFileName") run ()
 
     val file = new File(tmpFileName)
     val fileInputStream = new FileInputStream(file)
@@ -77,7 +78,7 @@ class S3Uploader(
       }
       // アップロード
       client.putObject(putRequest)
-      Process(s"rm $tmpFileName") run()
+      Process(s"rm $tmpFileName") run ()
       Right()
     } catch {
       case scala.util.control.NonFatal(e) => Left(e)
