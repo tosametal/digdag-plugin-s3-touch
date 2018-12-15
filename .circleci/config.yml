@@ -3,11 +3,12 @@ version: 2.0
 jobs:
   build:
     docker:
-    - image: centos:centos7
+      - image: circleci/openjdk:8-jdk
     steps:
       - checkout
       - run:
-          name: hello world
-          command: |
-            echo 'Hello, World'
-            echo 'Finish Build'
+          name: spotlessCheck
+          command: ./gradlew spotlessCheck
+      - run:
+          name: publish
+          command: ./gradlew publish
