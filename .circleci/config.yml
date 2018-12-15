@@ -1,0 +1,13 @@
+version: 2.0
+
+jobs:
+  build:
+    docker:
+    - image: centos:centos7
+    steps:
+      - checkout
+      - run:
+          name: hello world
+          command: |
+            echo 'Hello, World'
+            echo 'Finish Build'
