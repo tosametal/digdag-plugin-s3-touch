@@ -66,3 +66,8 @@ digdag run --project sample plugin.dig -p repos=`pwd`/build/repo --session "2018
 ```bash
 ./gradlew spotlessApply
 ```
+
+## Test
+```bash
+ ./gradlew test
+```

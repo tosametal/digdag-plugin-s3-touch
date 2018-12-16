@@ -10,15 +10,13 @@ import io.digdag.spi.OperatorContext
 object S3ClientBuilder {
 
   def build(s3TouchConfig: Config)(implicit context: OperatorContext): Either[Throwable, AmazonS3] = {
-
-    val accessKey = s3TouchConfig.get("access_key", classOf[String]).formatSecret
-    val secretKey = s3TouchConfig.get("secret_key", classOf[String]).formatSecret
-    val serviceEndpoint = s3TouchConfig.get("service_endpoint", classOf[String]).formatSecret
-    val defaultRegion = s3TouchConfig.get("default_region", classOf[String]).formatSecret
-    val maybeProxyHost = s3TouchConfig.getOptional("proxy_host", classOf[String]).toOption.map(_.formatSecret)
-    val maybeProxyPort = s3TouchConfig.getOptional("proxy_port", classOf[Int]).toOption
-
     try {
+      val accessKey = s3TouchConfig.get("access_key", classOf[String]).formatSecret
+      val secretKey = s3TouchConfig.get("secret_key", classOf[String]).formatSecret
+      val serviceEndpoint = s3TouchConfig.get("service_endpoint", classOf[String]).formatSecret
+      val defaultRegion = s3TouchConfig.get("default_region", classOf[String]).formatSecret
+      val maybeProxyHost = s3TouchConfig.getOptional("proxy_host", classOf[String]).toOption.map(_.formatSecret)
+      val maybeProxyPort = s3TouchConfig.getOptional("proxy_port", classOf[Int]).toOption
       val credentials = new BasicAWSCredentials(accessKey, secretKey)
       val clientConf = new ClientConfiguration()
       for {

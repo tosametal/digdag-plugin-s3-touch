@@ -29,7 +29,8 @@ dependencies {
     compile group: 'org.scala-lang', name: 'scala-library', version: scalaSemanticVersion
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: s3SdkVersion
-    testCompile group: 'org.specs2', name: 'specs2_2.12.7', version: specs2Version
+    testCompile group: 'org.specs2', name: 'specs2-core_2.12', version: specs2Version
+    testCompile group: 'org.specs2', name: 'specs2-junit_2.12', version: specs2Version
 }
 
 sourceSets {

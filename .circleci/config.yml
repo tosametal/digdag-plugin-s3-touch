@@ -10,5 +10,8 @@ jobs:
           name: spotlessCheck
           command: ./gradlew spotlessCheck
       - run:
+          name: test
+          command: ./gradlew test
+      - run:
           name: publish
           command: ./gradlew publish

@@ -11,13 +11,13 @@ import scala.sys.process.Process
 class S3Uploader(bucketName: String, accessControlList: String) {
 
   def upload(s3TouchConfig: Config, client: AmazonS3, fileName: String)(implicit context: OperatorContext): Either[Throwable, Unit] = {
+    val tmpFileName = "/tmp/" + fileNameWithoutDirectory(fileName)
+    Process(s"touch $tmpFileName") run ()
+    val file = new File(tmpFileName)
+    val fileInputStream = new FileInputStream(file)
+    val objectMetadata = new ObjectMetadata()
+    objectMetadata.setContentLength(file.length)
     try {
-      val tmpFileName = "/tmp/" + fileNameWithoutDirectory(fileName)
-      Process(s"touch $tmpFileName") run ()
-      val file = new File(tmpFileName)
-      val fileInputStream = new FileInputStream(file)
-      val objectMetadata = new ObjectMetadata()
-      objectMetadata.setContentLength(file.length)
       val putRequest = new PutObjectRequest(bucketName, fileName, fileInputStream, objectMetadata)
       val accessControlList = s3TouchConfig.get("access_control_list", classOf[String]).formatSecret
       mapAcl(accessControlList) match {
@@ -29,6 +29,8 @@ class S3Uploader(bucketName: String, accessControlList: String) {
       Right(())
     } catch {
       case scala.util.control.NonFatal(e) => Left(e)
+    } finally {
+      fileInputStream.close()
     }
   }
 
@@ -53,11 +55,14 @@ class S3Uploader(bucketName: String, accessControlList: String) {
 
 object S3Uploader {
 
-  // todo 例外時
   def apply(s3TouchConfig: Config)(implicit context: OperatorContext): Either[Throwable, S3Uploader] = {
-    val bucketName = s3TouchConfig.get("bucket_name", classOf[String]).formatSecret
-    val accessControlList = s3TouchConfig.get("access_control_list", classOf[String]).formatSecret
-    val uploader = new S3Uploader(bucketName, accessControlList)
-    Right(uploader)
+    try {
+      val bucketName = s3TouchConfig.get("bucket_name", classOf[String]).formatSecret
+      val accessControlList = s3TouchConfig.get("access_control_list", classOf[String]).formatSecret
+      val uploader = new S3Uploader(bucketName, accessControlList)
+      Right(uploader)
+    } catch {
+      case scala.util.control.NonFatal(e) => Left(e)
+    }
   }
 }
