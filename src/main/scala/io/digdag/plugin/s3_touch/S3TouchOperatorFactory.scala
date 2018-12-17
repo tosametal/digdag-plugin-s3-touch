@@ -1,6 +1,5 @@
 package io.digdag.plugin.s3_touch
 
-import io.digdag.client.config.Config
 import io.digdag.spi.{Operator, OperatorContext, OperatorFactory, TaskResult}
 import io.digdag.util.BaseOperator
 
@@ -16,18 +15,16 @@ object S3TouchOperatorFactory {
 
   private class S3TouchOperator(context: OperatorContext) extends BaseOperator(context) {
     override def runTask(): TaskResult = {
-      val params = request.getConfig.mergeDefault(request.getConfig.getNestedOrGetEmpty("s3_touch"))
-      val s3TouchConfig = params.get("s3_touch", classOf[Config])
-      val fileName = params.get("_command", classOf[String])
+      val config = request.getConfig.mergeDefault(request.getConfig.getNestedOrGetEmpty("s3_touch"))
 
       (for {
-        s3Client <- S3ClientBuilder.build(s3TouchConfig)(context)
-        s3uploader <- S3Uploader.apply(s3TouchConfig)(context)
-        fileName <- FileValidator.validate(fileName)
-        result <- s3uploader.upload(s3TouchConfig, s3Client, fileName)(context)
+        p <- ParamParser.parse(config)(context)
+        fileName <- FileValidator.validate(p.fileName)
+        s3Client <- S3ClientBuilder.build(p.accessKey, p.secretKey, p.maybeProxyHost, p.maybeProxyPort, p.serviceEndpoint, p.defaultRegion)
+        result <- S3Uploader.upload(s3Client, p.bucketName, fileName, p.acl)
       } yield result) match {
         case Right(_) =>
-          println("Success to upload")
+          println("Success to upload.")
         case Left(e) =>
           e.printStackTrace()
           scala.sys.exit(1)

@@ -4,13 +4,11 @@ import java.io.{File, FileInputStream}
 
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.services.s3.AmazonS3
-import io.digdag.client.config.Config
-import io.digdag.spi.OperatorContext
 import scala.sys.process.Process
 
-class S3Uploader(bucketName: String, accessControlList: String) {
+object S3Uploader {
 
-  def upload(s3TouchConfig: Config, client: AmazonS3, fileName: String)(implicit context: OperatorContext): Either[Throwable, Unit] = {
+  def upload(client: AmazonS3, bucketName: String, fileName: String, acl: String): Either[Throwable, Unit] = {
     val tmpFileName = "/tmp/" + fileNameWithoutDirectory(fileName)
     Process(s"touch $tmpFileName") run ()
     val file = new File(tmpFileName)
@@ -19,10 +17,9 @@ class S3Uploader(bucketName: String, accessControlList: String) {
     objectMetadata.setContentLength(file.length)
     try {
       val putRequest = new PutObjectRequest(bucketName, fileName, fileInputStream, objectMetadata)
-      val accessControlList = s3TouchConfig.get("access_control_list", classOf[String]).formatSecret
-      mapAcl(accessControlList) match {
-        case Some(acl) => putRequest.setCannedAcl(acl)
-        case None => throw new IllegalArgumentException(s"No such acl exists: $accessControlList")
+      mapAcl(acl) match {
+        case Some(a) => putRequest.setCannedAcl(a)
+        case None => throw new IllegalArgumentException(s"No such acl exists: $acl")
       }
       client.putObject(putRequest)
       Process(s"rm $tmpFileName") run ()
@@ -50,19 +47,5 @@ class S3Uploader(bucketName: String, accessControlList: String) {
     case "bucket-owner-full-control" => Some(CannedAccessControlList.BucketOwnerFullControl)
     case "aws-exec-read" => Some(CannedAccessControlList.AwsExecRead)
     case _ => None
-  }
-}
-
-object S3Uploader {
-
-  def apply(s3TouchConfig: Config)(implicit context: OperatorContext): Either[Throwable, S3Uploader] = {
-    try {
-      val bucketName = s3TouchConfig.get("bucket_name", classOf[String]).formatSecret
-      val accessControlList = s3TouchConfig.get("access_control_list", classOf[String]).formatSecret
-      val uploader = new S3Uploader(bucketName, accessControlList)
-      Right(uploader)
-    } catch {
-      case scala.util.control.NonFatal(e) => Left(e)
-    }
   }
 }

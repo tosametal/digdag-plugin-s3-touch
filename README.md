@@ -69,5 +69,5 @@ digdag run --project sample plugin.dig -p repos=`pwd`/build/repo --session "2018
 
 ## Test
 ```bash
- ./gradlew test
+./gradlew test
 ```
