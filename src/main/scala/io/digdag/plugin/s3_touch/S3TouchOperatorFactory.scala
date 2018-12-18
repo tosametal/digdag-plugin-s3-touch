@@ -23,11 +23,8 @@ object S3TouchOperatorFactory {
         s3Client <- S3ClientBuilder.build(p.accessKey, p.secretKey, p.maybeProxyHost, p.maybeProxyPort, p.serviceEndpoint, p.defaultRegion)
         result <- S3Uploader.upload(s3Client, p.bucketName, fileName, p.acl)
       } yield result) match {
-        case Right(_) =>
-          println("Success to upload.")
-        case Left(e) =>
-          e.printStackTrace()
-          scala.sys.exit(1)
+        case Right(_) => println("Success to upload.")
+        case Left(e) => throw e
       }
 
       TaskResult.empty(request)
